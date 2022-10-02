@@ -1,140 +1,136 @@
 
+import Card from './components/Card';
+import Header from './components/Header';
+import Drawer from './components/Drawer';
+import { useEffect, useState } from 'react';
+import axios from 'axios'
+
+ 
+// const arr = [
+//   {
+//     title: "Мужские Кроссовки Nike Blazer Mid Suede", 
+//   price: 12999,
+//   imageUrl: '/img/card/image_cros_1.jpg'
+//   },
+
+//   {
+//     title: "Мужские Кроссовки Nike Air Max 270", 
+//   price: 15600,
+//   imageUrl: '/img/card/image_cros_2.jpg'
+//   },
+
+//   {
+//     title: "Мужские Кроссовки Nike Blazer Mid Suede", 
+//   price: 8499,
+//   imageUrl: '/img/card/image_cros_3.jpg' 
+//   },
+  
+//   {
+//     title: "Кроссовки Puma X Aka Boku Future Rider", 
+//   price: 8999,
+//   imageUrl: '/img/card/image_cros_4.jpg' 
+//   }
+// ]
+
 
 function App() {
+  const [items, setItems] = useState([])
+  const [cartItems, setCartItems] = useState([]) // корзина. Добавление в корзину
+  const [searchValue, setSearchValue] = useState('') // поиск по сайту
+  const [cartOpened, setCartOpened] = useState(false);
+
+   
+useEffect(() => {
+  // Как принять данные (вытащить массив) с помощью fetch №4 1:55:00
+
+    // fetch('https://6337645f5327df4c43d3b1fe.mockapi.io/items').then(res => {
+    //   return res.json();
+    // })
+    // .then((json) => {
+    //   setItems(json);
+    // });
+
+
+    // axios (библиотека №5 00:47:00) отправляет get запрос и даёт мне данные по указанному в скобках адресу
+    // then - берёт ответ от сервера 
+   axios.get('https://6337645f5327df4c43d3b1fe.mockapi.io/items').then(res => {
+    // и в консоль лог отобрази res data
+      setItems(res.data)
+   })
+
+   // передача в корзину данных с сервера (т.е. те карточки, данные (кросовки), который выбрал клиент)
+   axios.get('https://6337645f5327df4c43d3b1fe.mockapi.io/cart').then(res => {
+    // и в консоль лог отобрази res data
+    setCartItems(res.data)
+   })
+
+}, [])
+
+
+
+// добавление в корзину
+const onAddToCart = (obj) => {
+// отправка на сервер (post) данные, которые добавляються в карточку
+// передача объекта вторым параметром - obj
+  axios.post('https://6337645f5327df4c43d3b1fe.mockapi.io/cart', obj);
+  //  берут предыдущие данные и возвращает обратно в массив.
+  setCartItems(prev => [...prev, obj]); // смотреть уроки по useState   
+}
+
+// удаление карточек в корзине
+const onRemoveItem = (id) => {
+  // отправка на сервер (post) данные, которые добавляються в карточку
+  // передача id карточки, которую необходимо удалить - 00:57:00 
+  // delete - удаляет карточку по указанному id 
+   axios.delete(`https://6337645f5327df4c43d3b1fe.mockapi.io/cart/${id}`);
+    //  берут предыдущие данные и возвращает обратно в массив.
+   setCartItems(prev => prev.filter(item => item.id !== id)); // №5 1:02:00
+ }
+
+
+// поиск на сайте
+const onChangeSearchInput = (event) => {
+//  console.log(event.target.value); // выводиться то что я написал в input
+  setSearchValue(event.target.value);
+}
+
+ 
   return (
     <div className="wrapper clear">
-              <div className="overlay">
-                 <div className="drawer">
-                     <h2 className="mb-30">Корзина</h2>
-
-                     
-
-
-
-                     <div className="cartItem d-flex align-center mb-20">
-                        {/* <img className="mr-20" width={70} height={70}  src="/img/card/image_cros_1.jpg" alt="Sneakers"/> */}
-                        
-                        <div style={{backgroundImage:'url(/img/card/image_cros_1.jpg)'}} className="cartItemImg"></div>
-
-                        <div className="mr-20 flex">
-                           <p className="mb-5">Мужские Кроссовки Nike Air Max 270</p> 
-                           <b>12 999 руб.</b>
-                        </div>
-                        <img className="removeBtn" src="/img/btn_remove.svg" alt="Remove"/>
-                     </div>
-
-                     <div className="cartItem d-flex align-center mb-20">
-                        {/* <img className="mr-20" width={70} height={70}  src="/img/card/image_cros_1.jpg" alt="Sneakers"/> */}
-                        
-                        <div style={{backgroundImage:'url(/img/card/image_cros_1.jpg)'}} className="cartItemImg"></div>
-
-                        <div className="mr-20 flex">
-                           <p className="mb-5">Мужские Кроссовки Nike Air Max 270</p> 
-                           <b>12 999 руб.</b>
-                        </div>
-                        <img className="removeBtn" src="/img/btn_remove.svg" alt="Remove"/>
-                     </div>
-
-                 </div>
-              </div>
-        <header className="d-flex justify-between align-center p-40">
-           <div className="d-flex align-center">
-                <img width={40} height={40}  src="/img/logo_store.png"/>
-                <div>
-                <h3 className="storeName text-uppercase">React Sneakers</h3>
-                <p className="storeName color">Магазин лучших кросовок</p>
-           </div>
-           </div>
-             <ul className="d-flex">
-                <li className="mr-30">
-                <img width={18} height={18}  src="/img/Cart.svg"/>
-                    <span>1205 руб.</span>
-               </li>
-                <li> 
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                     <path fill-rule="evenodd" clip-rule="evenodd" d="M0 10C0 4.579 4.579 0 10 0C15.421 0 20 4.579 20 10C20 13.19 18.408 16.078 16 17.924V18H15.898C14.23 19.245 12.187 20 10 20C7.813 20 5.77 19.245 4.102 18H4V17.924C1.592 16.078 0 13.189 0 10ZM7.12347 15.236C6.59154 15.6639 6.22136 16.2604 6.074 16.927C7.242 17.604 8.584 18 10 18C11.416 18 12.758 17.604 13.926 16.927C13.7785 16.2605 13.4082 15.6641 12.8764 15.2362C12.3445 14.8083 11.6827 14.5744 11 14.573H9C8.3173 14.5742 7.6554 14.808 7.12347 15.236ZM13.7677 13.4117C14.5877 13.9574 15.2286 14.7329 15.61 15.641C17.077 14.182 18 12.176 18 10C18 5.663 14.337 2 10 2C5.663 2 2 5.663 2 10C2 12.176 2.923 14.182 4.39 15.641C4.77144 14.7329 5.41227 13.9574 6.23227 13.4117C7.05227 12.866 8.01501 12.5742 9 12.573H11C11.985 12.5742 12.9477 12.866 13.7677 13.4117ZM6 8C6 5.72 7.72 4 10 4C12.28 4 14 5.72 14 8C14 10.28 12.28 12 10 12C7.72 12 6 10.28 6 8ZM8 8C8 9.178 8.822 10 10 10C11.178 10 12 9.178 12 8C12 6.822 11.178 6 10 6C8.822 6 8 6.822 8 8Z" fill="#9B9B9B"/>
-                  </svg>
-                </li>
-            </ul>
-        </header>
+              {cartOpened ? <Drawer items = {cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem}/> : null} 
+             {/* !!! или другой вариант написания. Более сокращенный вариант №4 1:34:45 */}
+             {/* {cartOpened && <Drawer onClose={() => setCartOpened(false)}/>} */}
+        <Header onClickCart={() => setCartOpened(true)}/>
         <div className="content p-40">
         <div className="d-flex align-center justify-between mb-40">
-                 <h1>Все кроссовки</h1>
+                 <h1>{searchValue ? `Поиск по запросу: "${searchValue}"` : `Все кросовки`}</h1>     
                  <div className="search-block d-flex">
                     <img src="/img/searh.svg" alt="searh"/>
-                    <input placeholder="Поиск..."/>
+                    {searchValue && <img onClick={() => setSearchValue('')} className="clear" src="/img/btn_remove.svg" alt="Clear"/>}
+                    <input onChange={onChangeSearchInput} value={searchValue} placeholder="Поиск..." maxLength="37"/>
                  </div>
            </div>
-       <div className="d-flex">
-       <div className="card">
-        <div className="favorite">
-           <img src="/img/card/unLiket.svg" alt="Unliked"/>
-        </div>
-                <img width={133} height={112} src="/img/card/image_cros_1.jpg" alt="Sneakers"/>
-                <h5>Мужские Кроссовки Nike Blazer Mid Suede</h5>
-                <div className="d-flex justify-between align-center">
-                  <div className="d-flex flex-column">
-                      <span>Цена:</span>
-                      <b>12 999 руб.</b>
-                  </div>
-                  <button className="button">
-                    <img width={11} height={11}  src="/img/card/cross.svg" alt="plus"/>
-                  </button>
-                </div>
-           </div>
-
-           <div className="card">
-                <img width={133} height={112} src="/img/card/image_cros_2.jpg" alt="Sneakers"/>
-                <h5>Мужские Кроссовки Nike Blazer Mid Suede</h5>
-                <div className="d-flex justify-between align-center">
-                  <div className="d-flex flex-column">
-                      <span>Цена:</span>
-                      <b>12 999 руб.</b>
-                  </div>
-                  <button className="button">
-                    <img width={11} height={11}  src="/img/card/cross.svg" alt="plus"/>
-                  </button>
-                </div>
-           </div>
-
-           <div className="card">
-                <img width={133} height={112} src="/img/card/image_cros_3.jpg" alt="Sneakers"/>
-                <h5>Мужские Кроссовки Nike Blazer Mid Suede</h5>
-                <div className="d-flex justify-between align-center">
-                  <div className="d-flex flex-column">
-                      <span>Цена:</span>
-                      <b>12 999 руб.</b>
-                  </div>
-                  <button className="button">
-                    <img width={11} height={11}  src="/img/card/cross.svg" alt="plus"/>
-                  </button>
-                </div>
-           </div>
-
-           <div className="card">
-                <img width={133} height={112} src="/img/card/image_cros_4.jpg" alt="Sneakers"/>
-                <h5>Мужские Кроссовки Nike Blazer Mid Suede</h5>
-                <div className="d-flex justify-between align-center">
-                  <div className="d-flex flex-column">
-                      <span>Цена:</span>
-                      <b>12 999 руб.</b>
-                  </div>
-                  <button className="button">
-                    <img width={11} height={11}  src="/img/card/cross.svg" alt="plus"/>
-                  </button>
-                </div>
-           </div>
-
-            
-
-           
-           </div>
-
-
-      </div>
-
-           
+       <div className="d-flex flex-wrap">
         
+       {items
+            .filter((filterItem) =>
+              filterItem.title
+                .toLowerCase()
+                .includes(searchValue),
+            )
+        .map((element, item) => 
+             <Card key={item}
+             title={element.title}
+             price= {element.price}
+             imageUrl= {element.imageUrl}
+             onFavorite = {() => console.log('Добавили в закладки')} 
+             onPlus = {(obj) => onAddToCart(obj)}
+             />
+        )}
+              
+              
+           </div>
+      </div>
     </div>
   );
 }
