@@ -1,6 +1,7 @@
  
 
-function Drawer({items = [], onRemove, onClose}) {
+function Drawer({items = [], onRemove,  onClose}) {
+
 
     return (
       // style={{display: 'none'}}

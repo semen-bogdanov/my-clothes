@@ -1,10 +1,11 @@
-
-import Card from './components/Card';
+ 
 import Header from './components/Header';
 import Drawer from './components/Drawer';
 import { useEffect, useState } from 'react';
 import axios from 'axios'
-
+import { Routes, Route} from "react-router-dom";
+import Home from './pages/Home'
+import Favorites from './pages/Favorites'
  
 // const arr = [
 //   {
@@ -36,6 +37,7 @@ import axios from 'axios'
 function App() {
   const [items, setItems] = useState([])
   const [cartItems, setCartItems] = useState([]) // корзина. Добавление в корзину
+  const [favorites, setFavorites] = useState([]) // закладки, избранное
   const [searchValue, setSearchValue] = useState('') // поиск по сайту
   const [cartOpened, setCartOpened] = useState(false);
 
@@ -64,6 +66,12 @@ useEffect(() => {
     setCartItems(res.data)
    })
 
+    // передача в "Мои избранные" данных с сервера (т.е. те карточки, данные (кросовки), который выбрал клиент)
+    axios.get('https://6337645f5327df4c43d3b1fe.mockapi.io/favorites').then(res => {
+      // и в консоль лог отобрази res data
+      setFavorites(res.data)
+     })
+
 }, [])
 
 
@@ -74,7 +82,7 @@ const onAddToCart = (obj) => {
 // передача объекта вторым параметром - obj
   axios.post('https://6337645f5327df4c43d3b1fe.mockapi.io/cart', obj);
   //  берут предыдущие данные и возвращает обратно в массив.
-  setCartItems(prev => [...prev, obj]); // смотреть уроки по useState   
+  setCartItems(prev => [...prev, obj]); // смотреть уроки по useState!!!   
 }
 
 // удаление карточек в корзине
@@ -87,6 +95,25 @@ const onRemoveItem = (id) => {
    setCartItems(prev => prev.filter(item => item.id !== id)); // №5 1:02:00
  }
 
+ // добавление в избранное/закладки
+const onAddToFavorites = async (obj) => { // async #5 02:31:00
+  // Условие, если в "Моих закладках" есть ID и мы пытаемся его снова добавить, то удали его"
+  if (favorites.find((favObj) => favObj.id === obj.id)) {
+    axios.delete(`https://6337645f5327df4c43d3b1fe.mockapi.io/favorites/${obj.id}`);
+    // и из стейта с помощью фильтрации удали этот id #5 02:22:00
+  //  setFavorites(prev => prev.filter(item => item.id !== obj.id)); // смотреть уроки по useState!!!    
+  }else {
+  // отправка на сервер (post) данные, которые добавляються в карточку
+  // передача объекта вторым параметром - obj
+  // axios.post('https://6337645f5327df4c43d3b1fe.mockapi.io/favorites', obj);
+  //  берут предыдущие данные и возвращает обратно в массив.
+  const {data} = await axios.post('https://6337645f5327df4c43d3b1fe.mockapi.io/favorites/', obj); // await #5 02:32:00
+  setFavorites((prev) => [...prev, data]); // смотреть уроки по useState!!! 
+  }
+}
+
+ 
+
 
 // поиск на сайте
 const onChangeSearchInput = (event) => {
@@ -95,43 +122,37 @@ const onChangeSearchInput = (event) => {
 }
 
  
-  return (
+return (
+  <>
     <div className="wrapper clear">
               {cartOpened ? <Drawer items = {cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem}/> : null} 
              {/* !!! или другой вариант написания. Более сокращенный вариант №4 1:34:45 */}
              {/* {cartOpened && <Drawer onClose={() => setCartOpened(false)}/>} */}
         <Header onClickCart={() => setCartOpened(true)}/>
-        <div className="content p-40">
-        <div className="d-flex align-center justify-between mb-40">
-                 <h1>{searchValue ? `Поиск по запросу: "${searchValue}"` : `Все кросовки`}</h1>     
-                 <div className="search-block d-flex">
-                    <img src="/img/searh.svg" alt="searh"/>
-                    {searchValue && <img onClick={() => setSearchValue('')} className="clear" src="/img/btn_remove.svg" alt="Clear"/>}
-                    <input onChange={onChangeSearchInput} value={searchValue} placeholder="Поиск..." maxLength="37"/>
-                 </div>
-           </div>
-       <div className="d-flex flex-wrap">
         
-       {items
-            .filter((filterItem) =>
-              filterItem.title
-                .toLowerCase()
-                .includes(searchValue),
-            )
-        .map((element, item) => 
-             <Card key={item}
-             title={element.title}
-             price= {element.price}
-             imageUrl= {element.imageUrl}
-             onFavorite = {() => console.log('Добавили в закладки')} 
-             onPlus = {(obj) => onAddToCart(obj)}
-             />
-        )}
-              
-              
-           </div>
-      </div>
+        <Routes>
+    <Route path="/Home" element={<Home 
+    items={items} 
+    searchValue={searchValue} 
+    setSearchValue={setSearchValue} 
+    onAddToCart={onAddToCart}
+    onAddToFavorites={onAddToFavorites}
+    onChangeSearchInput={onChangeSearchInput}/>} /> 
+
+  <Route path="/" element={<Home items={items} 
+    searchValue={searchValue} 
+    setSearchValue={setSearchValue} 
+    onAddToCart={onAddToCart}
+    onAddToFavorites={onAddToFavorites}
+    onChangeSearchInput={onChangeSearchInput}/>} /> 
+
+<Route path="/favorites" element={<Favorites items={favorites} onAddToFavorites={onAddToFavorites}/>} /> 
+
+</Routes>
+      
     </div>
+ 
+ </>
   );
 }
 
