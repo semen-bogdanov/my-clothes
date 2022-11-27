@@ -6,7 +6,8 @@
     margin-right: 30px;
     margin-bottom: 30px;
     transition: box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
-    
+    text-align: center;
+
     .plus {
       cursor: pointer;
     }
@@ -20,6 +21,7 @@
       font-size: 13px;
       opacity: 0.5;
       text-transform: uppercase;
+      text-align: left;
     }
   
     b {
@@ -29,8 +31,12 @@
     h5 {
       font-weight: 400;
       font-size: 14px;
+      text-align: left;
     }
   }
+ 
+ 
+   
     
   
   .favorite {
